@@ -1,4 +1,5 @@
 import os
+import sys
 from setuptools import find_packages, setup
 from distutils import sysconfig
 
@@ -7,6 +8,9 @@ with open('./README.md', 'r') as f:
     long_description = f.read()
 
 site_packages_path = sysconfig.get_python_lib(prefix='./')
+
+python_version = sys.version_info
+python_version_str = "{}{}".format(python_version.major, python_version.minor)
 
 setup(
     name='pbs-python',
@@ -26,7 +30,7 @@ setup(
     data_files=[
         (os.path.join(site_packages_path, 'pbs'), [
             'pbs/_pbs.so',
-            'pbs/_pbs.cpython-38-x86_64-linux-gnu.so'
+            'pbs/_pbs.cpython-{}-x86_64-linux-gnu.so'.format(python_version_str)
         ]),
     ],
     extras_require={
@@ -34,7 +38,7 @@ setup(
             "coverage[toml]>=5.3",
         ]
     },
-    python_requires='>=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*,!=3.6.*,!=3.7.*,<3.9',
+    python_requires='>=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*,!=3.6.*,!=3.7.*',
     classifiers=[
         'Programming Language :: Python',
         'Programming Language :: Python :: 2.7',
