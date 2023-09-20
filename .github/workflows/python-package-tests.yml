@@ -30,7 +30,7 @@ jobs:
         bash -c 'python -m pip install pip==20.3.4  # Install a version of pip which understands python_requires, to support py 2'
         bash -c 'python -m pip install --upgrade pip'
         bash -c 'python -m pip install --upgrade setuptools wheel'
-        bash -c 'pip install -r requirements-dev.txt --no-deps'
+        bash -c 'pip install -r requirements-dev.txt --no-deps --no-build-isolation'
 
     - name: Unit tests
       run: |
