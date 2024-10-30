@@ -13,20 +13,20 @@ jobs:
       image: ${{ matrix.container-name }}
 
     steps:
-    - name: Install bash
+    - name: Install bash and dependencies
+      # Use `sh` to install `bash` since `bash` may not be available initially
+      shell: sh
       run: |
-        dnf install -y bash
+        dnf install -y bash dnf-plugins-core
+        dnf install -y gcc openssl openssl-devel bzip2-devel libffi-devel \
+                       zlib-devel make wget curl-minimal git
+        echo "Bash installed at: $(command -v bash)"
 
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Install dependencies for Python build with SSL support
-      run: |
-        dnf install -y dnf-plugins-core
-        dnf install -y gcc openssl openssl-devel bzip2-devel libffi-devel \
-                       zlib-devel make wget curl-minimal git
-
     - name: Install pyenv
+      shell: bash
       run: |
         curl https://pyenv.run | bash
         echo "export PYENV_ROOT=\"${HOME}/.pyenv\"" >> $GITHUB_ENV
