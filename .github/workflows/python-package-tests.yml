@@ -27,14 +27,17 @@ jobs:
     - name: Install pyenv
       run: |
         curl https://pyenv.run | bash
-      # Set pyenv environment variables globally for all steps
       env:
         PYENV_ROOT: ${{ runner.temp }}/.pyenv
 
-    - name: Set up pyenv environment variables
+    - name: Configure pyenv environment variables
       run: |
         echo "PYENV_ROOT=${{ runner.temp }}/.pyenv" >> $GITHUB_ENV
         echo "PATH=${{ runner.temp }}/.pyenv/bin:${{ runner.temp }}/.pyenv/shims:$PATH" >> $GITHUB_ENV
+      shell: bash
+
+    - name: Initialize pyenv for all steps
+      run: |
         echo 'eval "$(pyenv init --path)"' >> $GITHUB_ENV
         echo 'eval "$(pyenv init -)"' >> $GITHUB_ENV
 
