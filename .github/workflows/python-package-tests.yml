@@ -13,67 +13,65 @@ jobs:
       image: ${{ matrix.container-name }}
 
     steps:
-    - name: Install bash and dependencies
-      # Use `sh` to install `bash` since `bash` may not be available initially
-      shell: sh
-      run: |
-        dnf install -y bash dnf-plugins-core
-        dnf install -y gcc openssl openssl-devel bzip2-devel libffi-devel \
-                       zlib-devel make wget curl-minimal git
-        echo "Bash installed at: $(command -v bash)"
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Install dependencies for Python build with SSL support
+        shell: sh
+        run: |
+          dnf install -y dnf-plugins-core
+          dnf install -y gcc openssl openssl-devel bzip2-devel libffi-devel \
+                         zlib-devel make wget curl-minimal git
 
-    - name: Install pyenv
-      shell: bash
-      run: |
-        curl https://pyenv.run | bash
-        echo "export PYENV_ROOT=\"${HOME}/.pyenv\"" >> $GITHUB_ENV
-        echo "export PATH=\"${HOME}/.pyenv/bin:${HOME}/.pyenv/shims:$PATH\"" >> $GITHUB_ENV
+      - name: Install pyenv
+        shell: sh
+        run: |
+          curl https://pyenv.run | sh
+          echo "export PYENV_ROOT=\"${HOME}/.pyenv\"" >> $GITHUB_ENV
+          echo "export PATH=\"${HOME}/.pyenv/bin:${HOME}/.pyenv/shims:$PATH\"" >> $GITHUB_ENV
 
-    - name: Set up pyenv environment
-      shell: bash
-      env:
-        PATH: "${HOME}/.pyenv/bin:${HOME}/.pyenv/shims:$PATH"
-      run: |
-        # Initialize pyenv
-        eval "$(pyenv init --path)"
-        eval "$(pyenv init -)"
+      - name: Set up pyenv environment
+        shell: sh
+        env:
+          PATH: "${HOME}/.pyenv/bin:${HOME}/.pyenv/shims:$PATH"
+        run: |
+          eval "$(pyenv init --path)"
+          eval "$(pyenv init -)"
 
-    - name: Install Python 3.10 with pyenv
-      shell: bash
-      env:
-        PATH: "${HOME}/.pyenv/bin:${HOME}/.pyenv/shims:$PATH"
-      run: |
-        pyenv install 3.10.12
-        pyenv global 3.10.12
-        python --version
+      - name: Install Python 3.10 with pyenv
+        shell: sh
+        env:
+          PATH: "${HOME}/.pyenv/bin:${HOME}/.pyenv/shims:$PATH"
+        run: |
+          pyenv install 3.10.12
+          pyenv global 3.10.12
+          python --version
 
-    - name: Verify Python SSL support
-      shell: bash
-      env:
-        PATH: "${HOME}/.pyenv/bin:${HOME}/.pyenv/shims:$PATH"
-      run: |
-        python -c "import ssl; print('SSL support is available:', ssl.OPENSSL_VERSION)"
+      - name: Verify Python SSL support
+        shell: sh
+        env:
+          PATH: "${HOME}/.pyenv/bin:${HOME}/.pyenv/shims:$PATH"
+        run: |
+          python -c "import ssl; print('SSL support is available:', ssl.OPENSSL_VERSION)"
 
-    - name: Install Torque
-      run: |
-        dnf install -y epel-release
-        dnf install -y torque torque-client torque-devel torque-drmaa torque-mom torque-server torque-scheduler
+      - name: Install Torque
+        shell: sh
+        run: |
+          dnf install -y epel-release
+          dnf install -y torque torque-client torque-devel torque-drmaa torque-mom torque-server torque-scheduler
 
-    - name: Install dependencies
-      shell: bash
-      env:
-        PATH: "${HOME}/.pyenv/bin:${HOME}/.pyenv/shims:$PATH"
-      run: |
-        python -m pip install --upgrade pip
-        python -m pip install --upgrade setuptools wheel
-        python -m pip install ".[all]"
+      - name: Install dependencies
+        shell: sh
+        env:
+          PATH: "${HOME}/.pyenv/bin:${HOME}/.pyenv/shims:$PATH"
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install --upgrade setuptools wheel
+          python -m pip install ".[all]"
 
-    - name: Unit tests
-      shell: bash
-      env:
-        PATH: "${HOME}/.pyenv/bin:${HOME}/.pyenv/shims:$PATH"
-      run: |
-        python -m unittest discover --verbose --catch --start-directory tests/unit
+      - name: Unit tests
+        shell: sh
+        env:
+          PATH: "${HOME}/.pyenv/bin:${HOME}/.pyenv/shims:$PATH"
+        run: |
+          python -m unittest discover --verbose --catch --start-directory tests/unit
