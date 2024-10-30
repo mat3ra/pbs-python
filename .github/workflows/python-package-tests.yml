@@ -43,12 +43,11 @@ jobs:
 
     - name: Install dependencies
       run: |
-        rpm -ivh ${{ secrets.FILESERVER_URL }}/centos/7.9.2009/exabyte/x86_64/Packages/torque-6.0.0.1-1.adaptive.el7.centos.x86_64.rpm
-        rpm -ivh ${{ secrets.FILESERVER_URL }}/centos/7.9.2009/exabyte/x86_64/Packages/torque-devel-6.0.0.1-1.adaptive.el7.centos.x86_64.rpm
-        bash -c 'python -m pip install pip==20.3.4  # Install a version of pip which understands python_requires, to support py 2'
+        dnf install -y epel-release
+        dnf install -y torque torque-client torque-devel torque-drmaa torque-mom torque-server torque-scheduler
         bash -c 'python -m pip install --upgrade pip'
         bash -c 'python -m pip install --upgrade setuptools wheel'
-        bash -c 'pip install -r requirements-dev.txt --no-deps --no-build-isolation'
+        bash -c 'pip install ".[all]"'
 
     - name: Unit tests
       run: |
