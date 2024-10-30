@@ -13,65 +13,43 @@ jobs:
       image: ${{ matrix.container-name }}
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-      - name: Install dependencies for Python build with SSL support
-        shell: sh
-        run: |
-          dnf install -y dnf-plugins-core
-          dnf install -y gcc openssl openssl-devel bzip2-devel libffi-devel \
-                         zlib-devel make wget curl-minimal git
+    - name: Install dependencies for Python build
+      run: |
+        dnf install -y dnf-plugins-core
+        dnf install -y gcc openssl openssl-devel bzip2-devel libffi-devel zlib-devel make wget curl-minimal
+        dnf install -y git
 
-      - name: Install pyenv
-        shell: sh
-        run: |
-          curl https://pyenv.run | sh
-          echo "export PYENV_ROOT=\"${HOME}/.pyenv\"" >> $GITHUB_ENV
-          echo "export PATH=\"${HOME}/.pyenv/bin:${HOME}/.pyenv/shims:$PATH\"" >> $GITHUB_ENV
+    - name: Download and Install Python 3.10 from Source
+      run: |
+        PYTHON_VERSION=3.10.12
+        wget https://www.python.org/ftp/python/$PYTHON_VERSION/Python-$PYTHON_VERSION.tgz
+        tar -xzf Python-$PYTHON_VERSION.tgz
+        cd Python-$PYTHON_VERSION
+        ./configure --enable-optimizations
+        make -j $(nproc)
+        make altinstall  # This installs it as `python3.10` without overwriting the default `python3`
+        ln -s /usr/local/bin/python3.10 /usr/local/bin/python  # Link it as `python`
 
-      - name: Set up pyenv environment
-        shell: sh
-        env:
-          PATH: "${HOME}/.pyenv/bin:${HOME}/.pyenv/shims:$PATH"
-        run: |
-          eval "$(pyenv init --path)"
-          eval "$(pyenv init -)"
+    - name: Verify Python and SSL module
+      run: |
+        python --version
+        python -c "import ssl; print('SSL support is available:', ssl.OPENSSL_VERSION)"
 
-      - name: Install Python 3.10 with pyenv
-        shell: sh
-        env:
-          PATH: "${HOME}/.pyenv/bin:${HOME}/.pyenv/shims:$PATH"
-        run: |
-          pyenv install 3.10.12
-          pyenv global 3.10.12
-          python --version
+    - name: Install Torque
+      run: |
+        dnf install -y epel-release
+        dnf install -y torque torque-client torque-devel torque-drmaa torque-mom torque-server torque-scheduler
 
-      - name: Verify Python SSL support
-        shell: sh
-        env:
-          PATH: "${HOME}/.pyenv/bin:${HOME}/.pyenv/shims:$PATH"
-        run: |
-          python -c "import ssl; print('SSL support is available:', ssl.OPENSSL_VERSION)"
+    - name: Upgrade pip and install dependencies
+      run: |
+        python3.10 -m ensurepip
+        python3.10 -m pip install --upgrade pip
+        python3.10 -m pip install --upgrade setuptools wheel
+        python3.10 -m pip install ".[all]"
 
-      - name: Install Torque
-        shell: sh
-        run: |
-          dnf install -y epel-release
-          dnf install -y torque torque-client torque-devel torque-drmaa torque-mom torque-server torque-scheduler
-
-      - name: Install dependencies
-        shell: sh
-        env:
-          PATH: "${HOME}/.pyenv/bin:${HOME}/.pyenv/shims:$PATH"
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install --upgrade setuptools wheel
-          python -m pip install ".[all]"
-
-      - name: Unit tests
-        shell: sh
-        env:
-          PATH: "${HOME}/.pyenv/bin:${HOME}/.pyenv/shims:$PATH"
-        run: |
-          python -m unittest discover --verbose --catch --start-directory tests/unit
+    - name: Unit tests
+      run: |
+        python3.10 -m unittest discover --verbose --catch --start-directory tests/unit
