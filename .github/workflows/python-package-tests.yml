@@ -20,7 +20,7 @@ jobs:
     - name: Install dependencies for Python
       run: |
         dnf install -y dnf-plugins-core
-        dnf install -y gcc openssl-devel bzip2-devel libffi-devel zlib-devel make
+        dnf install -y gcc openssl openssl-devel bzip2-devel libffi-devel zlib-devel make wget curl-minimal
         dnf install -y git
 
     - name: Set up Python 3.10
