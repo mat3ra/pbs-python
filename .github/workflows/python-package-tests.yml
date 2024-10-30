@@ -9,17 +9,35 @@ jobs:
     strategy:
       matrix:
         container-name:
-          # - centos/python-27-centos7
-          - centos/python-38-centos7
+          # - centos/python-38-centos7
+          - almalinux/latest
     container:
       image: ${{ matrix.container-name }}
       options: --user root
 
     steps:
-    #- name: Update Git on Container
-      #run: |
-      #  yum install -y https://repo.ius.io/ius-release-el7.rpm https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
-      #  yum upgrade -y git
+    - name: Setup Container
+      run: |
+        # FROM almalinux:latest
+        dnf install -y gcc make git zlib-devel bzip2 bzip2-devel readline-devel \
+            sqlite sqlite-devel openssl-devel xz xz-devel libffi-devel findutils \
+            which && \
+            dnf clean all
+
+        # Set environment variables for pyenv
+        export HOME=/root
+        export PYENV_ROOT=$HOME/.pyenv
+        export PATH=$PYENV_ROOT/bin:$PATH
+
+        git clone https://github.com/pyenv/pyenv.git $PYENV_ROOT && \
+            echo 'export PYENV_ROOT="$HOME/.pyenv"' >> $HOME/.bashrc && \
+            echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> $HOME/.bashrc && \
+            echo 'eval "$(pyenv init --path)"' >> $HOME/.bashrc
+
+        # Install Python 3.10.12 with pyenv
+        /root/.pyenv/bin/pyenv install 3.10.12 && \
+            /root/.pyenv/bin/pyenv global 3.10.12
+
 
     - uses: actions/checkout@v2
 
