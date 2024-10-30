@@ -9,46 +9,33 @@ jobs:
     strategy:
       matrix:
         container-name:
-          # - centos/python-38-centos7
-          - almalinux:latest
+          - almalinux:9
+
     container:
       image: ${{ matrix.container-name }}
       options: --user root
 
-    steps:
-    - name: Setup Container
-      run: |
-        # FROM almalinux:latest
-        dnf install -y gcc make git zlib-devel bzip2 bzip2-devel readline-devel \
-            sqlite sqlite-devel openssl-devel xz xz-devel libffi-devel findutils \
-            which && \
-            dnf clean all
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-    - name: Install pyenv
+    - name: Install dependencies for Python
       run: |
-        curl https://pyenv.run | bash
-      env:
-        PYENV_ROOT: ${{ runner.temp }}/.pyenv
+        dnf install -y dnf-plugins-core
+        dnf install -y curl gcc openssl-devel bzip2-devel libffi-devel zlib-devel make
+        dnf install -y git
 
-    - name: Configure pyenv environment variables
-      run: |
-        echo "PYENV_ROOT=${{ runner.temp }}/.pyenv" >> $GITHUB_ENV
-        echo "PATH=${{ runner.temp }}/.pyenv/bin:${{ runner.temp }}/.pyenv/shims:$PATH" >> $GITHUB_ENV
-      shell: bash
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
 
-    - name: Install Python 3.10.12 with pyenv
-      run: |
-        export PATH="${{ runner.temp }}/.pyenv/bin:${{ runner.temp }}/.pyenv/shims:$PATH"
-        eval "$(pyenv init --path)"
-        eval "$(pyenv init -)"
-        pyenv install 3.10.12
-        pyenv global 3.10.12
-
-    - uses: actions/checkout@v2
-    - name: Install dependencies
+    - name: Install Torque
       run: |
         dnf install -y epel-release
         dnf install -y torque torque-client torque-devel torque-drmaa torque-mom torque-server torque-scheduler
+
+    - name: Install dependencies
+      run: |
         python -m pip install --upgrade pip
         python -m pip install --upgrade setuptools wheel
         pip install ".[all]"
