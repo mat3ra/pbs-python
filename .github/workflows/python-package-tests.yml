@@ -24,23 +24,26 @@ jobs:
             which && \
             dnf clean all
 
-        # Set environment variables for pyenv
-        export HOME=/root
-        export PYENV_ROOT=$HOME/.pyenv
-        export PATH=$PYENV_ROOT/bin:$PATH
+    - name: Install pyenv
+      run: |
+        curl https://pyenv.run | bash
+      # Set pyenv environment variables globally for all steps
+      env:
+        PYENV_ROOT: ${{ runner.temp }}/.pyenv
 
-        git clone https://github.com/pyenv/pyenv.git $PYENV_ROOT && \
-            echo 'export PYENV_ROOT="$HOME/.pyenv"' >> $HOME/.bashrc && \
-            echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> $HOME/.bashrc && \
-            echo 'eval "$(pyenv init --path)"' >> $HOME/.bashrc
+    - name: Set up pyenv environment variables
+      run: |
+        echo "PYENV_ROOT=${{ runner.temp }}/.pyenv" >> $GITHUB_ENV
+        echo "PATH=${{ runner.temp }}/.pyenv/bin:${{ runner.temp }}/.pyenv/shims:$PATH" >> $GITHUB_ENV
+        echo 'eval "$(pyenv init --path)"' >> $GITHUB_ENV
+        echo 'eval "$(pyenv init -)"' >> $GITHUB_ENV
 
-        # Install Python 3.10.12 with pyenv
-        /root/.pyenv/bin/pyenv install 3.10.12 && \
-            /root/.pyenv/bin/pyenv global 3.10.12
-
+    - name: Install Python 3.10.12 with pyenv
+      run: |
+        pyenv install 3.10.12
+        pyenv global 3.10.12
 
     - uses: actions/checkout@v2
-
     - name: Install dependencies
       run: |
         dnf install -y epel-release
