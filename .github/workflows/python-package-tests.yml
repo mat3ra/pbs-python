@@ -4,7 +4,6 @@ on: [push]
 
 jobs:
   build:
-
     runs-on: ubuntu-20.04
     strategy:
       matrix:
@@ -15,30 +14,42 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
-    - name: Install dependencies for Python
+    - name: Install dependencies for Python build
       run: |
         dnf install -y dnf-plugins-core
         dnf install -y gcc openssl openssl-devel bzip2-devel libffi-devel zlib-devel make wget curl-minimal
         dnf install -y git
 
-    - name: Set up Python 3.10
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.10'
+    - name: Download and Install Python 3.10 from Source
+      run: |
+        PYTHON_VERSION=3.10.12
+        wget https://www.python.org/ftp/python/$PYTHON_VERSION/Python-$PYTHON_VERSION.tgz
+        tar -xzf Python-$PYTHON_VERSION.tgz
+        cd Python-$PYTHON_VERSION
+        ./configure --enable-optimizations
+        make -j $(nproc)
+        make altinstall  # This installs it as `python3.10` without overwriting the default `python3`
+        ln -s /usr/local/bin/python3.10 /usr/local/bin/python  # Link it as `python`
+
+    - name: Verify Python and SSL module
+      run: |
+        python --version
+        python -c "import ssl; print('SSL support is available:', ssl.OPENSSL_VERSION)"
 
     - name: Install Torque
       run: |
         dnf install -y epel-release
         dnf install -y torque torque-client torque-devel torque-drmaa torque-mom torque-server torque-scheduler
 
-    - name: Install dependencies
+    - name: Upgrade pip and install dependencies
       run: |
-        python3 -m pip install --upgrade pip
-        python3 -m pip install --upgrade setuptools wheel
-        python3 -m pip install ".[all]"
+        python3.10 -m ensurepip
+        python3.10 -m pip install --upgrade pip
+        python3.10 -m pip install --upgrade setuptools wheel
+        python3.10 -m pip install ".[all]"
 
     - name: Unit tests
       run: |
-        python -m unittest discover --verbose --catch --start-directory tests/unit
+        python3.10 -m unittest discover --verbose --catch --start-directory tests/unit
