@@ -10,7 +10,7 @@ jobs:
       matrix:
         container-name:
           # - centos/python-38-centos7
-          - almalinux/latest
+          - almalinux:latest
     container:
       image: ${{ matrix.container-name }}
       options: --user root
