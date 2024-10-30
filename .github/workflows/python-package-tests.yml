@@ -36,13 +36,11 @@ jobs:
         echo "PATH=${{ runner.temp }}/.pyenv/bin:${{ runner.temp }}/.pyenv/shims:$PATH" >> $GITHUB_ENV
       shell: bash
 
-    - name: Initialize pyenv for all steps
-      run: |
-        echo 'eval "$(pyenv init --path)"' >> $GITHUB_ENV
-        echo 'eval "$(pyenv init -)"' >> $GITHUB_ENV
-
     - name: Install Python 3.10.12 with pyenv
       run: |
+        export PATH="${{ runner.temp }}/.pyenv/bin:${{ runner.temp }}/.pyenv/shims:$PATH"
+        eval "$(pyenv init --path)"
+        eval "$(pyenv init -)"
         pyenv install 3.10.12
         pyenv global 3.10.12
 
