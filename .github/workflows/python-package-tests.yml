@@ -10,11 +10,10 @@ jobs:
       matrix:
         container-name:
           - almalinux:9
-
     container:
       image: ${{ matrix.container-name }}
-      options: --user root
 
+    steps:
     - name: Checkout code
       uses: actions/checkout@v3
 
