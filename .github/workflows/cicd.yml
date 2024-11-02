@@ -3,7 +3,32 @@ name: Python package tests
 on: [push]
 
 jobs:
-  build:
+  run-linter:
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        python-version: [3.10.13]
+
+    steps:
+      - name: Checkout this repository
+        uses: actions/checkout@v3
+        with:
+          lfs: true
+
+      - name: Checkout actions repository
+        uses: actions/checkout@v3
+        with:
+          repository: Exabyte-io/actions
+          token: ${{ secrets.BOT_GITHUB_TOKEN }}
+          path: actions
+
+      - name: Run ruff linter
+        uses: ./actions/py/lint
+        with:
+          python-version: ${{ matrix.python-version }}
+
+
+  run-tests:
     runs-on: ubuntu-20.04
     strategy:
       matrix:
@@ -53,3 +78,29 @@ jobs:
     - name: Unit tests
       run: |
         python3.10 -m unittest discover --verbose --catch --start-directory tests/unit
+
+
+  publish:
+    needs: [run-linter, run-tests]
+    runs-on: ubuntu-latest
+    if: github.ref_name == 'dev'
+
+    steps:
+      - name: Checkout this repository
+        uses: actions/checkout@v3
+        with:
+          lfs: true
+
+      - name: Checkout actions repository
+        uses: actions/checkout@v3
+        with:
+          repository: Exabyte-io/actions
+          token: ${{ secrets.BOT_GITHUB_TOKEN }}
+          path: actions
+
+      - name: Publish release
+        uses: ./actions/py/publish
+        with:
+          python-version: 3.x
+          github-token: ${{ secrets.BOT_GITHUB_TOKEN }}
+          pypi-api-token: ${{ secrets.PYPI_API_TOKEN }}
