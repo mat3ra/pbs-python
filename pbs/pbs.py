@@ -963,7 +963,7 @@ def use_user_keywords(id, d, l):
       resp = getreq(id)
       check_resp(d, resp)
     else:
-        raise TypeError('Expected a string got %s :%s' %(type(res), res))
+      raise TypeError('Expected a string got %s :%s' %(type(res), res))
 
 def get_mom_values(id, list = None):
   """

@@ -3,7 +3,7 @@
 #          Bas van der Vlies (basv@sara.nl)
 #
 # SVN INFO:
-#   $Id: PBSQuery.py 368 2018-10-22 10:16:12Z bas $
+#   $Id$
 #
 """
 Usage: from PBSQuery import PBSQuery
@@ -59,7 +59,7 @@ you are interested in, eg: only show state of nodes
     nodes = p.getnodes(l)
 """
 import pbs
-import UserDict
+from collections import UserDict
 import string
 import sys
 import re
@@ -319,7 +319,7 @@ class PBSQuery:
         self._statqueue(name, attrib_list)
         try:
             return self.d[name]
-        except KeyError, detail:
+        except KeyError(detail):
             return self.d
 
     def getqueues(self, attrib_list=None):
@@ -346,7 +346,7 @@ class PBSQuery:
         self._statnode(name, attrib_list)
         try:
             return self.d[name]
-        except KeyError, detail:
+        except KeyError(detail):
             return self.d
 
     def getnodes(self, attrib_list=None):
@@ -380,7 +380,7 @@ class PBSQuery:
         self._statjob(name, attrib_list)
         try:
             return self.d[name]
-        except KeyError, detail:
+        except KeyError(detail):
             return self.d
 
     def getjobs(self, attrib_list=None):
@@ -403,12 +403,12 @@ class PBSQuery:
         """
         self.OLD_DATA_STRUCTURE = True
 
-class _PBSobject(UserDict.UserDict):
+class _PBSobject(UserDict):
     TRUE  = 1
     FALSE = 0
 
     def __init__(self, dictin = None):
-        UserDict.UserDict.__init__(self)
+        UserDict.__init__(self)
         self.name = None
 
         if dictin:
@@ -527,7 +527,7 @@ class node(_PBSobject):
         try:
             a = self['jobs']
             return self.TRUE
-        except KeyError, detail:
+        except KeyError(detail):
             return self.FALSE
 
     def get_jobs(self, unique=None):
@@ -601,30 +601,30 @@ def main():
     p = PBSQuery() 
     serverinfo = p.get_serverinfo()
     for server in serverinfo.keys():
-        print server, ' version: ', serverinfo[server].get_version()
+        print(server, ' version: ', serverinfo[server].get_version())
     for resource in serverinfo[server].keys():
-        print '\t ', resource, ' = ', serverinfo[server][resource]
+        print('\t ', resource, ' = ', serverinfo[server][resource])
 
     queues = p.getqueues()
     for queue in queues.keys():
-        print queue
+        print(queue)
         if queues[queue].is_execution():
-            print '\t ', queues[queue]
+            print('\t ', queues[queue])
         if queues[queue].has_key('acl_groups'):
-            print '\t acl_groups: yes'
+            print('\t acl_groups: yes')
         else:
-            print '\t acl_groups: no'
+            print('\t acl_groups: no')
 
     jobs = p.getjobs()
     for name,job in jobs.items():
         if job.is_running():
-            print job
+            print(job)
 
     l = ['state']
     nodes = p.getnodes(l)
     for name,node in nodes.items():
         if node.is_free(): 
-            print node
+            print(node)
 
 if __name__ == "__main__":
     main()

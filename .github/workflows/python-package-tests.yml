@@ -4,34 +4,52 @@ on: [push]
 
 jobs:
   build:
-
     runs-on: ubuntu-20.04
     strategy:
       matrix:
         container-name:
-          # - centos/python-27-centos7
-          - centos/python-38-centos7
+          - almalinux:9
     container:
       image: ${{ matrix.container-name }}
-      options: --user root
 
     steps:
-    - name: Update Git on Container
-      run: |
-        yum install -y https://repo.ius.io/ius-release-el7.rpm https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
-        yum upgrade git
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
 
-    - uses: actions/checkout@v2
-
-    - name: Install dependencies
+    - name: Install dependencies for Python build
       run: |
-        rpm -ivh ${{ secrets.FILESERVER_URL }}/centos/7.9.2009/exabyte/x86_64/Packages/torque-6.0.0.1-1.adaptive.el7.centos.x86_64.rpm
-        rpm -ivh ${{ secrets.FILESERVER_URL }}/centos/7.9.2009/exabyte/x86_64/Packages/torque-devel-6.0.0.1-1.adaptive.el7.centos.x86_64.rpm
-        bash -c 'python -m pip install pip==20.3.4  # Install a version of pip which understands python_requires, to support py 2'
-        bash -c 'python -m pip install --upgrade pip'
-        bash -c 'python -m pip install --upgrade setuptools wheel'
-        bash -c 'pip install -r requirements-dev.txt --no-deps'
+        dnf install -y dnf-plugins-core
+        dnf install -y gcc openssl openssl-devel bzip2-devel libffi-devel zlib-devel make wget curl-minimal
+        dnf install -y git
+
+    - name: Download and Install Python 3.10 from Source
+      run: |
+        PYTHON_VERSION=3.10.12
+        wget https://www.python.org/ftp/python/$PYTHON_VERSION/Python-$PYTHON_VERSION.tgz
+        tar -xzf Python-$PYTHON_VERSION.tgz
+        cd Python-$PYTHON_VERSION
+        ./configure --enable-optimizations
+        make -j $(nproc)
+        make altinstall  # This installs it as `python3.10` without overwriting the default `python3`
+        ln -s /usr/local/bin/python3.10 /usr/local/bin/python  # Link it as `python`
+
+    - name: Verify Python and SSL module
+      run: |
+        python --version
+        python -c "import ssl; print('SSL support is available:', ssl.OPENSSL_VERSION)"
+
+    - name: Install Torque
+      run: |
+        dnf install -y epel-release
+        dnf install -y torque torque-client torque-devel torque-drmaa torque-mom torque-server torque-scheduler
+        dnf install -y compat-openssl11
+
+    - name: Upgrade pip and install dependencies
+      run: |
+        python3.10 -m pip install ".[all]"
 
     - name: Unit tests
       run: |
-        bash -c 'python -m unittest discover --verbose --catch --start-directory tests/unit'
+        python3.10 -m unittest discover --verbose --catch --start-directory tests/unit
