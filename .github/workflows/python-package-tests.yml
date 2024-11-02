@@ -44,6 +44,7 @@ jobs:
       run: |
         dnf install -y epel-release
         dnf install -y torque torque-client torque-devel torque-drmaa torque-mom torque-server torque-scheduler
+        dnf install -y compat-openssl11
 
     - name: Upgrade pip and install dependencies
       run: |
