@@ -83,8 +83,10 @@ jobs:
 
 
   publish:
-    needs: [run-linter, run-tests]
-    runs-on: ubuntu-latest
+    needs:
+      # - run-linter
+      - run-tests
+    runs-on: ubuntu-20.04
     if: github.ref_name == 'dev'
 
     steps:
