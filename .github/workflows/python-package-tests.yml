@@ -45,9 +45,6 @@ jobs:
 
     - name: Upgrade pip and install dependencies
       run: |
-#         python3.10 -m ensurepip
-#         python3.10 -m pip install --upgrade pip
-#         python3.10 -m pip install --upgrade setuptools wheel
         python3.10 -m pip install ".[all]"
 
     - name: Unit tests
