@@ -144,3 +144,6 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
+
+# Local clone of wrap sources used by scripts/build-pbs-c-bindings.sh
+.surfsara-pbs-python/
