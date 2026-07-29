@@ -44,7 +44,6 @@ jobs:
         run: |
           dnf install -y \
             bzip2-devel \
-            curl \
             gcc \
             gcc-c++ \
             git \
