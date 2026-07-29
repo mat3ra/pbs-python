@@ -13,6 +13,8 @@ __pycache__/
 
 # C extensions
 *.so
+# Keep Python 3.10 Torque bindings (force-tracked; see MANIFEST.in)
+!pbs/_pbs.cpython-310-*-linux-gnu.so
 
 # Distribution / packaging
 .Python

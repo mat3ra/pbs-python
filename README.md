@@ -1,6 +1,7 @@
 # PBS Python
 
 This is pip-package of [pbs_python 4.4.1](http://oss.trac.surfsara.nl/pbs_python)
-by  Bas van der Vlies (bas.vandervlies@surfsara.nl).
-Native extensions from this package compiled on CentOS 7.5 with PBS Torque 5
-installed on it and probably not compatible with other versions.
+by Bas van der Vlies (bas.vandervlies@surfsara.nl).
+
+Native `_pbs` extensions are built for Python 3.10 against Torque 6 on AlmaLinux 9
+(`x86_64` and `aarch64`). See `scripts/build-pbs-c-bindings.sh`.
