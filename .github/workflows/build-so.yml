@@ -1,6 +1,9 @@
 name: Build PBS shared objects
 
 on:
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
 
 concurrency:
