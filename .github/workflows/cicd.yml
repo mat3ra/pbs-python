@@ -4,7 +4,7 @@ on: [push]
 
 jobs:
   run-linter:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     # Intentionally disable running linter b/c it fails with many errors
     if: github.ref_name == 'BLAH'
     strategy:
@@ -13,12 +13,12 @@ jobs:
 
     steps:
       - name: Checkout this repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           lfs: true
 
       - name: Checkout actions repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: Exabyte-io/actions
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
@@ -31,7 +31,7 @@ jobs:
 
 
   run-tests:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         container-name:
@@ -41,7 +41,7 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         fetch-depth: 0
 
@@ -53,7 +53,7 @@ jobs:
 
     - name: Download and Install Python 3.10 from Source
       run: |
-        PYTHON_VERSION=3.10.12
+        PYTHON_VERSION=3.10.13
         wget https://www.python.org/ftp/python/$PYTHON_VERSION/Python-$PYTHON_VERSION.tgz
         tar -xzf Python-$PYTHON_VERSION.tgz
         cd Python-$PYTHON_VERSION
@@ -86,17 +86,17 @@ jobs:
     needs:
       # - run-linter
       - run-tests
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     if: github.ref_name == 'dev'
 
     steps:
       - name: Checkout this repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           lfs: true
 
       - name: Checkout actions repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: Exabyte-io/actions
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
