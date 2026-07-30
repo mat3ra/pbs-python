@@ -13,6 +13,8 @@ __pycache__/
 
 # C extensions
 *.so
+# Keep Python 3.10 Torque bindings (force-tracked; see MANIFEST.in)
+!pbs/_pbs.cpython-310-*-linux-gnu.so
 
 # Distribution / packaging
 .Python
@@ -144,3 +146,6 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
+
+# Local clone of wrap sources used by scripts/build-pbs-c-bindings.sh
+.surfsara-pbs-python/
