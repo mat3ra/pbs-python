@@ -4,7 +4,7 @@ on: [push]
 
 jobs:
   run-linter:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     # Intentionally disable running linter b/c it fails with many errors
     if: github.ref_name == 'BLAH'
     strategy:
@@ -31,11 +31,14 @@ jobs:
 
 
   run-tests:
-    runs-on: ubuntu-20.04
     strategy:
       matrix:
-        container-name:
-          - almalinux:9
+        include:
+          - runs-on: ubuntu-latest
+            container-name: almalinux:9
+          - runs-on: ubuntu-24.04-arm
+            container-name: almalinux:9
+    runs-on: ${{ matrix.runs-on }}
     container:
       image: ${{ matrix.container-name }}
 
@@ -86,7 +89,7 @@ jobs:
     needs:
       # - run-linter
       - run-tests
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     if: github.ref_name == 'dev'
 
     steps:
